@@ -1,0 +1,46 @@
+---
+# defaults file for kibana-common
+
+##############################################################
+
+kibana_user: xp
+kibana_group: data
+raw_name: "dyco-raw"
+
+##########
+
+kibana_package: kibana
+kibana_version: "6.5.1"
+
+###########
+
+kibana_home: "/opt/kibana-home"
+kibana_data: "/var/kibana-data"
+kibana_config: "{{ kibana_home }}/config"
+kibana_log: "/var/log/kibana"
+kibana_pid: "/var/run/kibana.pid"
+kibana_bin: "{{ kibana_home }}/bin"
+
+############
+
+kibana_port: "5601"
+kibana_server: "{{ ansible_nodename }}"
+kibana_host: "{{ ansible_default_ipv4.address }}"
+
+############
+
+kibana_transform_vis_allow: "true"
+kibana_scripts_max_compilation_minutes: 50
+
+############
+
+tmp_folder: "/var/tmp"
+kibana_tmp: "{{ tmp_folder }}/kibana"
+nexus_url: "http://{{ nexus_ip }}:{{ nexus_port }}/repository/{{ raw_name }}"
+kibana_url_repository : "{{ nexus_url }}/{{ kibana_package }}/bin"
+
+################################################################
+
+selinux_status: "permissive"
+
+################################################################

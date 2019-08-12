@@ -1,0 +1,33 @@
+---
+
+- name: Create all directories needed for installation
+  file:
+   path: "{{ item }}"
+   state: directory
+   owner: "{{ kibana_user }}"
+   group: "{{ kibana_group }}"
+   mode: 0755             
+  loop:
+   - "{{ kibana_log }}"
+   - "{{ kibana_pid }}"
+
+
+- name: Dynamic fill of config files
+  vars:
+  template:
+   src: "{{ item.src }}"
+   dest: "{{ item.dest }}"
+   owner: "{{ kibana_user }}"
+   group: "{{ kibana_group }}"
+   mode: 0644
+   force: yes
+  loop:
+   - {src: 'kibana.yml.j2', dest: '{{ kibana_config }}/kibana.yml'}
+   - {src: 'systemd/kibana.service.j2', dest: '{{ kibana_service }}'}
+
+
+- name: Restart service
+  systemd:
+    enabled: yes
+    state: started
+    name: kibana

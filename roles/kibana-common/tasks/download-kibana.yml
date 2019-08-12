@@ -1,0 +1,57 @@
+---
+
+- name: Create a temporary folder for kibana
+  file:
+    path: "{{ kibana_tmp }}"
+    state: directory
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0755
+
+- name: Create a home for kibana
+  file:
+    path: "{{ kibana_home }}"
+    state: directory
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: 0755
+
+- name: run my module
+  become: yes
+  get_checksum: 
+    raw: "{{ raw_name }}"
+    repo: "{{ kibana_package }}"
+    option: bin
+    version: "{{ kibana_version }}"
+    address: "{{ nexus_ip}}" 
+    hash_type: sha1
+  register: result
+
+- name: téléchargement de kibana
+  get_url:
+    url: "{{ kibana_url_repository }}/{{ kibana_version }}/{{ kibana_package }}-{{ kibana_version }}-linux-x86_64.tar.gz"
+    dest: "{{ kibana_tmp }}"
+    checksum: "sha1:{{result.msg }}"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+
+
+- name: extract kibana
+  unarchive:
+    src: "{{ kibana_tmp }}/{{ kibana_package }}-{{ kibana_version }}-linux-x86_64.tar.gz"
+    dest: "{{ kibana_tmp }}"
+    remote_src: yes
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    extra_opts: [--strip-components=1]
+
+
+- name: run the command (mv)
+  become: yes
+  shell: "mv {{ kibana_tmp }}/* {{ kibana_home }}/"
+
+
+- name: Remove the downloaded File
+  file:
+   path: "{{ kibana_home }}/{{ kibana_package }}-{{ kibana_version }}-linux-x86_64.tar.gz"
+   state: absent

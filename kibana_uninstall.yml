@@ -1,0 +1,26 @@
+---
+
+- name: Uninstall kibana
+  hosts: kibana
+  become: yes
+  gather_facts: True
+  tasks:
+   
+    - name: Reload and disable kibana service
+      systemd:
+        daemon-reload: yes
+        enabled: no
+        state: stopped
+        name: kibana
+
+    - name: delete all created directories
+      file:
+       path: "{{ item }}"
+       state: absent
+       owner: "{{ es_user }}"
+       group: "{{ es_group }}"
+      loop:
+       - "{{ kibana_home }}"
+       - "{{ kibana_pid }}"
+       - "{{ kibana_log }}"
+

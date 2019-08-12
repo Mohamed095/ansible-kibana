@@ -1,0 +1,11 @@
+---
+
+- name: reload systemd configuration
+  become: yes
+  command: systemctl daemon-reload
+
+
+- name: restart kibana
+  become: yes
+  service: name="kibana.service" state=restarted enabled=yes
+  

@@ -1,0 +1,30 @@
+---
+# tasks file for kibana-common
+
+- name: Create group for kibana
+  group:
+   name: "{{ kibana_group }}"
+   gid: "3001"
+   state: present
+
+- name: Create user for kibana
+  user:
+   name: "{{ kibana_user }}"
+   uid: "2004"
+   group: "{{ kibana_group }}"
+   state: present
+
+- name: include download
+  include: download-kibana.yml
+
+- name: include config.yml
+  include: config-kibana.yml
+
+- name: delete all temp folders
+  file:
+   path: "{{ item }}"
+   state: absent
+   owner: "{{ kibana_user }}"
+   group: "{{ kibana_group }}"
+  loop:
+   - "{{ kibana_tmp }}"

@@ -1,0 +1,45 @@
+---
+
+- hosts: kibana
+  become: yes
+  gather_facts: True
+  tasks:
+
+    - name: Check that the elasticsearch.yml exists
+      stat:
+        path: "{{ es_home }}/config/elasticsearch.yml"
+      register: stat_result
+
+    - name: Check if port 5601 is listening
+      wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: "{{ kibana_port }}"
+        delay: 5
+        timeout: 10
+        msg: "Timeout waiting for 5601 to respond"
+      register: result
+      ignore_errors: yes
+
+
+    - debug:
+        msg: "Failed - Kibana is not installed"
+      when: result is failed or stat_result.stat.exists == False
+
+    - debug:
+        msg: "Success - Kibana is installed "
+      when:  result is success and stat_result.stat.exists == True
+
+    - uri: url="http://{{ kibana_host }}:{{ kibana_port }}/" return_content=yes
+      register: json_response
+      when: result is success
+
+
+    - name : Fetch Kibana version
+      debug:
+        var: json_response.json.version.number
+      when:  result is success
+
+    - include_role:
+        name: kibana-common
+      when:  result is failed
+
